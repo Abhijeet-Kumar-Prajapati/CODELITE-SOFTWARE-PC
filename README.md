@@ -12,15 +12,14 @@ No telemetry. No accounts. No tracking. Under 100 KB of code.
 [![Offline](https://img.shields.io/badge/network-offline-4CAF50)]()
 [![Version](https://img.shields.io/badge/version-1.0.0-8A2BE2)](docs/CHANGELOG.md)
 
-**[🌐 Try it in the browser](https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/)** · **[💾 Download](https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download)** · [**User guide**](docs/USER-GUIDE-EN.txt)
+**[💾 Download the installer](https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download)** · [**User guide**](docs/USER-GUIDE-EN.txt)
 
-| | | |
-|---|---|---|
-| <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe"><img src="https://img.shields.io/badge/Download-Windows%20Installer-0e639c?style=for-the-badge" alt="Download Windows installer"></a> | <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Portable-1.0.0.zip"><img src="https://img.shields.io/badge/Download-Portable%20ZIP-6a9955?style=for-the-badge" alt="Download portable ZIP"></a> | <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases"><img src="https://img.shields.io/badge/Releases-1.0.0-8b8b8b?style=for-the-badge" alt="All releases"></a> |
-| Windows installer · 20.7 MB · per-user, no admin | Portable ZIP · 61 KB · unzip and run, nothing to install | Every version, with changelogs |
+| | |
+|---|---|
+| <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe"><img src="https://img.shields.io/badge/Download-Windows%20Installer-0e639c?style=for-the-badge" alt="Download Windows installer"></a> | <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases"><img src="https://img.shields.io/badge/Releases-1.0.0-8b8b8b?style=for-the-badge" alt="All releases"></a> |
+| **`CodeLite-Setup-1.0.0.exe`** &middot; 20.7 MB &middot; Windows 10/11 &middot; per-user, no admin rights | Every version, with changelogs |
 
-> The download links above always point at the newest release, so they never
-> go stale. Prefer the portable ZIP if you would rather not install anything.
+> The download link above always points at the newest release, so it never goes stale.
 
 </div>
 
@@ -28,20 +27,19 @@ No telemetry. No accounts. No tracking. Under 100 KB of code.
 
 ## 📥 Download
 
-**No build step, no package manager, no setup.** Grab a file and start editing.
+**No build step, no package manager, no setup.** Download the installer and start editing.
 
-| Build | Size | How to use |
+| File | Size | How to use |
 |---|---|---|
-| **Windows installer** | 20.7 MB | Double click, pick shortcuts, done. Per-user, never asks for admin rights. |
-| **Portable ZIP** | 61 KB | Unzip anywhere, then run `START CodeLite.bat`. Keeps everything in one folder. |
+| **`CodeLite-Setup-1.0.0.exe`** | 20.7 MB | Double click it, choose your shortcuts, done. Installs per-user, so it never asks for administrator rights. |
 
+- **Direct download** — <https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe>
 - **Release page** — <https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases>
-- **Live in the browser** — <https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/> (works in Chrome and Edge)
-- **Project page with screenshots** — <https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download>
+- **Download page** — <https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download>
 
-Both builds contain the same editor. The installer adds shortcuts and
-uninstall support; the portable build stays a single self-contained folder you
-can keep on a USB stick.
+Once installed it launches from the Start Menu or a Desktop shortcut, and puts
+its own icon and app window on your machine. It needs Edge or Chrome, which
+Windows 10 and 11 already ship with.
 
 ---
 
@@ -163,8 +161,6 @@ shortcuts. Uninstall from **Settings → Apps → Installed apps**.
 
 > The installer is not yet code-signed, so Windows SmartScreen may show a
 > warning the first time. Click **More info → Run anyway**.
-
-There is also a **portable ZIP** for people who prefer no installer at all.
 
 ---
 
