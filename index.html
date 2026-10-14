@@ -4,151 +4,342 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CodeLite — a lightweight, fully offline code editor for Windows</title>
-<meta name="description" content="A lightweight, fully offline code editor for Windows. No telemetry, no accounts, no tracking. 30+ languages, minimap, command palette, find and replace. Under 100 KB of code.">
+<meta name="description" content="CodeLite is a lightweight, fully offline code editor for Windows. Syntax highlighting for 30+ languages, minimap, command palette and regex find and replace. No telemetry, no accounts, no tracking.">
 <link rel="icon" href="src/build/codelite.ico" sizes="any">
 <style>
   :root{
-    --bg:#1e1e1e; --bg-alt:#252526; --bg-deep:#181818; --panel:#333333;
+    --bg:#1e1e1e; --bg-alt:#252526; --bg-deep:#181818; --panel:#333333; --panel-2:#3c3c3c;
     --fg:#d4d4d4; --fg-dim:#8b8b8b; --fg-bright:#e8e8e8;
-    --border:#2b2b2b; --border-soft:#333;
-    --accent:#0e639c; --accent-hover:#1177bb;
-    --ok:#73c991; --kw:#569cd6; --str:#ce9178; --num:#b5cea8; --com:#6a9955; --fn:#dcdcaa;
+    --border:#2b2b2b; --border-soft:#333; --border-hi:#454545;
+    --accent:#0e639c; --accent-hi:#1177bb; --accent-soft:rgba(14,99,156,.16);
+    --ok:#73c991; --warn:#cca700; --err:#f14c4c;
+    --kw:#569cd6; --str:#ce9178; --num:#b5cea8; --com:#6a9955; --fn:#dcdcaa;
+    --typ:#4ec9b0; --vr:#9cdcfe; --cst:#4fc1ff; --tag:#569cd6;
     --font-ui:"Segoe UI",system-ui,-apple-system,sans-serif;
     --font-mono:"Cascadia Code","Cascadia Mono",Consolas,"Courier New",monospace;
+    --ease:cubic-bezier(.4,0,.2,1);
   }
   html[data-theme="light"]{
-    --bg:#ffffff; --bg-alt:#f3f3f3; --bg-deep:#f8f8f8; --panel:#f3f3f3;
-    --fg:#3b3b3b; --fg-dim:#767676; --fg-bright:#1f1f1f;
-    --border:#e5e5e5; --border-soft:#e5e5e5;
-    --accent:#0e639c; --accent-hover:#1177bb;
-    --ok:#388a34; --kw:#0000ff; --str:#a31515; --num:#098658; --com:#008000; --fn:#795e26;
+    --bg:#ffffff; --bg-alt:#f7f7f8; --bg-deep:#fbfbfc; --panel:#ececed;
+    --panel-2:#e2e2e4;
+    --fg:#3b3b3b; --fg-dim:#6e6e6e; --fg-bright:#1a1a1a;
+    --border:#e3e3e6; --border-soft:#ededf0; --border-hi:#cfcfd4;
+    --accent:#0e639c; --accent-hi:#0f6fae; --accent-soft:rgba(14,99,156,.1);
+    --ok:#2f7d32; --warn:#8a6d00; --err:#c62828;
+    --kw:#0000c0; --str:#a31515; --num:#0a7d38; --com:#3a7d3a;
+    --fn:#795e26; --typ:#267f99; --vr:#001080; --cst:#0070c1; --tag:#800000;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
-    background:var(--bg); color:var(--fg);
-    font-family:var(--font-ui); font-size:15px; line-height:1.65;
-    -webkit-font-smoothing:antialiased;
+    background:var(--bg);color:var(--fg);
+    font-family:var(--font-ui);font-size:15.5px;line-height:1.68;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
   }
-  a{color:var(--kw);text-decoration:none}
+  a{color:var(--cst);text-decoration:none}
   a:hover{text-decoration:underline}
-  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* animated backdrop */
+  .aura{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+  .aura i{position:absolute;display:block;border-radius:50%;filter:blur(90px);opacity:.28}
+  .aura i:nth-child(1){width:520px;height:520px;background:var(--accent);top:-180px;left:-120px;animation:drift 24s var(--ease) infinite}
+  .aura i:nth-child(2){width:420px;height:420px;background:#7c3aed;bottom:-200px;right:-100px;animation:drift 30s var(--ease) infinite reverse}
+  html[data-theme="light"] .aura i{opacity:.16}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0)}
+    33%{transform:translate(90px,60px)}
+    66%{transform:translate(-50px,90px)}
+  }
 
   /* ---------------------------------------------------------- header */
   header{
-    position:sticky;top:0;z-index:20;
-    background:color-mix(in srgb,var(--bg) 88%,transparent);
-    backdrop-filter:blur(12px);
+    position:sticky;top:0;z-index:50;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);
+    backdrop-filter:blur(16px) saturate(1.4);
     border-bottom:1px solid var(--border);
   }
-  .bar{display:flex;align-items:center;gap:14px;height:56px}
-  .bar img{width:28px;height:28px;border-radius:6px}
-  .bar .nm{font-weight:600;color:var(--fg-bright);letter-spacing:-.2px}
-  .bar .tag{font-size:12px;color:var(--fg-dim);border-left:1px solid var(--border);padding-left:14px}
-  .bar .sp{margin-left:auto;display:flex;align-items:center;gap:8px}
-  .lnk{font-size:13px;color:var(--fg-dim);padding:6px 10px;border-radius:6px;transition:.15s}
+  .bar{display:flex;align-items:center;gap:13px;height:58px}
+  .bar img{width:29px;height:29px;border-radius:7px}
+  .bar .nm{font-weight:650;color:var(--fg-bright);letter-spacing:-.2px}
+  .bar .tag{font-size:12px;color:var(--fg-dim);border-left:1px solid var(--border);padding-left:13px}
+  .bar .sp{margin-left:auto;display:flex;align-items:center;gap:4px}
+  .lnk{font-size:13.5px;color:var(--fg-dim);padding:7px 11px;border-radius:7px;transition:.16s}
   .lnk:hover{color:var(--fg-bright);background:var(--panel);text-decoration:none}
   .tgl{
-    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-    font-size:14px;color:var(--fg-dim);cursor:pointer;
-    background:var(--panel);border:1px solid var(--border);border-radius:6px;transition:.15s
+    width:31px;height:31px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;color:var(--fg-dim);cursor:pointer;background:transparent;
+    border:1px solid var(--border);border-radius:7px;transition:.16s
   }
-  .tgl:hover{color:var(--fg-bright);border-color:var(--accent)}
+  .tgl:hover{color:var(--fg-bright);border-color:var(--accent-hi);background:var(--panel)}
 
   /* ---------------------------------------------------------- hero */
-  .hero{padding:66px 0 54px;text-align:center}
+  .hero{padding:76px 0 60px;text-align:center;position:relative}
   .pill{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:5px 13px;margin-bottom:22px;
-    font-size:12px;color:var(--fg-dim);
-    background:var(--bg-alt);border:1px solid var(--border);border-radius:20px
-  }
-  .pill i{width:6px;height:6px;border-radius:50%;background:var(--ok);display:block}
-  h1{
-    font-size:clamp(34px,6vw,54px);font-weight:700;letter-spacing:-1.6px;
-    color:var(--fg-bright);line-height:1.1;margin-bottom:16px
-  }
-  h1 em{font-style:normal;color:var(--accent-hover)}
-  .sub{max-width:610px;margin:0 auto 32px;font-size:17px;color:var(--fg-dim)}
-
-  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-  .btn{
     display:inline-flex;align-items:center;gap:9px;
-    padding:12px 22px;font-size:14.5px;font-weight:600;
-    border-radius:7px;border:1px solid transparent;cursor:pointer;
-    transition:transform .14s, filter .14s, border-color .14s
+    padding:6px 15px;margin-bottom:26px;font-size:12.5px;color:var(--fg-dim);
+    background:var(--bg-alt);border:1px solid var(--border);border-radius:30px;
+    animation:rise .7s var(--ease) both
+  }
+  .pill i{
+    width:7px;height:7px;border-radius:50%;background:var(--ok);display:block;
+    box-shadow:0 0 0 0 rgba(115,201,145,.6);animation:pulse 2.2s infinite
+  }
+  @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(115,201,145,0)}100%{box-shadow:0 0 0 0 rgba(115,201,145,0)}}
+
+  h1{
+    font-size:clamp(33px,6.2vw,58px);font-weight:700;letter-spacing:-2px;
+    color:var(--fg-bright);line-height:1.08;margin-bottom:8px;
+    animation:rise .7s .08s var(--ease) both
+  }
+  h1 em{font-style:normal;background:linear-gradient(100deg,var(--cst),#a855f7);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .typewrap{
+    min-height:1.15em;margin-bottom:16px;
+    font-family:var(--font-mono);font-size:clamp(16px,3vw,26px);color:var(--cst)
+  }
+  .caret{display:inline-block;width:2.5px;height:1.05em;background:var(--cst);
+    vertical-align:-.16em;margin-left:3px;animation:blink 1.05s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .sub{max-width:620px;margin:0 auto 34px;font-size:17.5px;color:var(--fg-dim);
+    animation:rise .7s .16s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  .cta{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;
+    animation:rise .7s .24s var(--ease) both}
+  .btn{
+    position:relative;overflow:hidden;
+    display:inline-flex;align-items:center;gap:10px;
+    padding:14px 26px;font-size:15px;font-weight:600;border-radius:9px;
+    border:1px solid transparent;cursor:pointer;transition:transform .16s var(--ease),filter .16s
   }
   .btn:hover{transform:translateY(-2px);text-decoration:none}
   .btn.main{background:var(--accent);color:#fff}
-  .btn.main:hover{background:var(--accent-hover)}
-  .btn.ghost{background:var(--bg-alt);color:var(--fg);border-color:var(--border)}
-  .btn.ghost:hover{border-color:var(--accent);color:var(--fg-bright)}
-  .btn small{font-weight:400;opacity:.72;font-size:12px}
-  .meta{font-size:12.5px;color:var(--fg-dim)}
+  .btn.main:hover{background:var(--accent-hi)}
+  .btn.main::after{
+    content:"";position:absolute;top:0;left:-140%;width:60%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);
+    animation:shine 3.6s var(--ease) infinite
+  }
+  @keyframes shine{0%,62%{left:-140%}100%{left:190%}}
+  .btn small{font-weight:400;opacity:.8;font-size:12.5px}
+  .ghost{background:var(--bg-alt);color:var(--fg);border-color:var(--border)}
+  .ghost:hover{border-color:var(--accent-hi);color:var(--fg-bright)}
+
+  .meta{font-size:13px;color:var(--fg-dim);animation:rise .7s .32s var(--ease) both}
   .meta b{color:var(--fg)}
 
-  /* ---------------------------------------------------------- sections */
-  section{padding:52px 0;border-top:1px solid var(--border)}
+  /* ---------------------------------------------------------- stats */
+  .stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;margin-top:46px
+  }
+  .stat{
+    padding:20px 14px;background:var(--bg-alt);
+    border:1px solid var(--border);border-radius:11px;transition:.2s var(--ease)
+  }
+  .stat:hover{border-color:var(--accent-hi);transform:translateY(-3px)}
+  .stat .v{
+    font-size:29px;font-weight:700;color:var(--fg-bright);
+    letter-spacing:-1px;font-variant-numeric:tabular-nums
+  }
+  .stat .k{font-size:12px;color:var(--fg-dim);text-transform:uppercase;letter-spacing:1.1px;margin-top:3px}
+
+  /* ---------------------------------------------------------- section */
+  section{padding:70px 0;border-top:1px solid var(--border)}
+  .eyebrow{
+    text-align:center;font-size:12.5px;font-weight:600;letter-spacing:1.7px;
+    text-transform:uppercase;color:var(--accent-hi);margin-bottom:12px
+  }
   h2{
-    font-size:13px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
-    color:var(--fg-dim);margin-bottom:28px;text-align:center
+    text-align:center;font-size:clamp(24px,3.6vw,34px);font-weight:700;
+    letter-spacing:-.9px;color:var(--fg-bright);margin-bottom:14px
   }
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:14px}
+  .lead{max-width:640px;margin:0 auto 42px;text-align:center;font-size:16.5px;color:var(--fg-dim)}
+
+  /* ---------------------------------------------------------- editor mock */
+  .mock{
+    max-width:940px;margin:0 auto;border-radius:12px;overflow:hidden;
+    border:1px solid var(--border-hi);background:var(--bg-deep);
+    box-shadow:0 34px 80px -34px rgba(0,0,0,.7)
+  }
+  .mock-bar{
+    display:flex;align-items:center;gap:8px;padding:10px 14px;
+    background:var(--panel);border-bottom:1px solid var(--border)
+  }
+  .dot{width:11px;height:11px;border-radius:50%;flex:none}
+  .d1{background:#f14c4c}.d2{background:#cca700}.d3{background:#73c991}
+  .mock-title{
+    flex:1;text-align:center;font-size:12px;color:var(--fg-dim);
+    font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .mock-body{display:flex;min-height:290px}
+  .gut{
+    width:46px;flex:none;padding:12px 0;background:var(--bg-alt);
+    border-right:1px solid var(--border);text-align:right;
+    font-family:var(--font-mono);font-size:12.5px;line-height:1.75;color:var(--fg-dim)
+  }
+  .gut b{display:block;padding-right:10px;font-weight:400}
+  .gut b.on{color:var(--fg-bright);background:var(--sel,.264f78)}
+  html[data-theme="light"] .gut b.on{background:#add6ff}
+  .code{
+    flex:1;padding:12px 0 12px 14px;overflow:hidden;
+    font-family:var(--font-mono);font-size:13px;line-height:1.75;white-space:pre
+  }
+  .code .c{color:var(--com)}
+  .code .k{color:var(--kw)}
+  .code .s{color:var(--str)}
+  .code .n{color:var(--num)}
+  .code .f{color:var(--fn)}
+  .code .t{color:var(--typ)}
+  .blink{animation:blink 1.05s steps(1) infinite;background:currentColor;color:inherit}
+
+  .panel{
+    border-top:1px solid var(--border);background:var(--bg-alt);
+    padding:11px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-family:var(--font-mono);font-size:12.5px;color:var(--fg-dim)
+  }
+  .panel .fld{
+    flex:1;min-width:170px;padding:6px 10px;background:var(--bg-deep);
+    border:1px solid var(--accent);border-radius:5px;color:var(--fg-bright)
+  }
+  .chip{
+    padding:4px 10px;border-radius:5px;background:var(--panel-2);
+    color:var(--fg-dim);font-size:11.5px
+  }
+  .hits{color:var(--ok)}
+  .mark{background:#613214;color:#ffd700;border-radius:2px;padding:0 1px}
+  html[data-theme="light"] .mark{background:#ffe89a;color:#5a4200}
+
+  .caption{
+    text-align:center;margin-top:16px;font-size:13.5px;color:var(--fg-dim);
+    font-family:var(--font-mono)
+  }
+
+  /* ---------------------------------------------------------- showcase */
+  .tabs{
+    display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:22px
+  }
+  .tab{
+    padding:8px 16px;font-size:13.5px;color:var(--fg-dim);cursor:pointer;
+    background:var(--bg-alt);border:1px solid var(--border);border-radius:30px;
+    transition:.18s var(--ease)
+  }
+  .tab:hover{color:var(--fg-bright);border-color:var(--border-hi)}
+  .tab.on{background:var(--accent);border-color:transparent;color:#fff}
+  .stage{
+    position:relative;border-radius:12px;overflow:hidden;
+    border:1px solid var(--border-hi);background:var(--bg-deep);
+    box-shadow:0 30px 70px -32px rgba(0,0,0,.65)
+  }
+  .stage figure{
+    position:absolute;inset:0;opacity:0;transition:opacity .55s var(--ease);
+    pointer-events:none
+  }
+  .stage figure.on{opacity:1;pointer-events:auto;position:relative}
+  .stage img{width:100%;display:block}
+  .stage figcaption{
+    padding:13px 18px;font-size:13.5px;color:var(--fg-dim);
+    background:var(--bg-alt);border-top:1px solid var(--border)
+  }
+
+  /* ---------------------------------------------------------- features */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(244px,1fr));gap:14px}
   .card{
-    padding:20px;background:var(--bg-alt);
-    border:1px solid var(--border);border-radius:10px;
-    transition:border-color .16s, transform .16s
+    padding:22px;background:var(--bg-alt);border:1px solid var(--border);
+    border-radius:12px;transition:.22s var(--ease)
   }
-  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card:hover{border-color:var(--accent-hi);transform:translateY(-4px)}
   .card .ic{
-    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-    font-size:15px;background:var(--panel);border-radius:7px;margin-bottom:12px
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;background:var(--panel);border-radius:9px;margin-bottom:13px
   }
-  .card h3{font-size:14.5px;color:var(--fg-bright);margin-bottom:6px;font-weight:600}
-  .card p{font-size:13.2px;color:var(--fg-dim);line-height:1.6}
-
-  /* ---------------------------------------------------------- shots */
-  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-  .shot{background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .shot img{width:100%;display:block;border-bottom:1px solid var(--border)}
-  .shot .cap{padding:11px 14px;font-size:12.5px;color:var(--fg-dim)}
-
-  /* ---------------------------------------------------------- code */
-  pre{
-    background:var(--bg-deep);border:1px solid var(--border);border-radius:10px;
-    padding:18px 20px;overflow-x:auto;
-    font-family:var(--font-mono);font-size:13px;line-height:1.65
+  .card h3{font-size:15px;color:var(--fg-bright);margin-bottom:7px;font-weight:650}
+  .card p{font-size:13.6px;color:var(--fg-dim);line-height:1.62}
+  .card code,.lead code,.faq code{
+    font-family:var(--font-mono);font-size:12.5px;
+    background:var(--panel);padding:1.5px 6px;border-radius:4px;color:var(--fg)
   }
-  .kw{color:var(--kw)} .str{color:var(--str)} .num{color:var(--num)}
-  .com{color:var(--com)} .fn{color:var(--fn)} .dim{color:var(--fg-dim)}
+
+  /* ---------------------------------------------------------- compare */
+  .cmp{max-width:760px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .row{
+    display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:10px;padding:14px 20px;
+    border-bottom:1px solid var(--border);font-size:14px;align-items:center
+  }
+  .row:last-child{border-bottom:0}
+  .row.head{background:var(--panel);font-size:12px;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--fg-dim);font-weight:600}
+  .row.us{background:var(--accent-soft)}
+  .row.us b{color:var(--accent-hi)}
+  .row .yes{color:var(--ok);font-weight:600}
+  .row .no{color:var(--fg-dim)}
+  @media(max-width:640px){
+    .row{grid-template-columns:1.3fr .8fr .8fr;font-size:13px;padding:12px 14px}
+  }
+
+  /* ---------------------------------------------------------- marquee */
+  .marq{overflow:hidden;position:relative;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .marq .track{display:flex;gap:11px;width:max-content;animation:slide 42s linear infinite}
+  .marq:hover .track{animation-play-state:paused}
+  @keyframes slide{to{transform:translateX(-50%)}}
+  .tag{
+    padding:8px 16px;white-space:nowrap;font-family:var(--font-mono);font-size:13px;
+    color:var(--fg-dim);background:var(--bg-alt);border:1px solid var(--border);border-radius:7px
+  }
 
   /* ---------------------------------------------------------- faq */
-  .faq{max-width:720px;margin:0 auto}
+  .faq{max-width:740px;margin:0 auto}
   details{
-    background:var(--bg-alt);border:1px solid var(--border);
-    border-radius:9px;padding:14px 18px;margin-bottom:10px
+    background:var(--bg-alt);border:1px solid var(--border);border-radius:11px;
+    padding:16px 20px;margin-bottom:11px;transition:.2s var(--ease)
   }
-  summary{cursor:pointer;color:var(--fg-bright);font-size:14.5px;font-weight:600;list-style:none}
+  details[open]{border-color:var(--accent-hi)}
+  summary{cursor:pointer;color:var(--fg-bright);font-size:15px;font-weight:600;list-style:none}
   summary::-webkit-details-marker{display:none}
-  summary::before{content:"\25B8";display:inline-block;width:18px;color:var(--accent);transition:transform .16s}
+  summary::before{content:"\25B8";display:inline-block;width:19px;color:var(--accent-hi);
+    transition:transform .2s var(--ease)}
   details[open] summary::before{transform:rotate(90deg)}
-  details p{margin-top:11px;font-size:13.6px;color:var(--fg-dim);padding-left:18px}
-  details code,.card code{font-family:var(--font-mono);font-size:12.5px;background:var(--panel);padding:1px 5px;border-radius:4px}
+  details p{margin-top:12px;font-size:14px;color:var(--fg-dim);padding-left:19px}
+
+  /* ---------------------------------------------------------- final cta */
+  .band{
+    text-align:center;padding:58px 34px;border-radius:16px;
+    background:linear-gradient(140deg,var(--accent-soft),transparent 65%);
+    border:1px solid var(--border-hi)
+  }
+  .band h2{margin-bottom:12px}
+  .band p{max-width:520px;margin:0 auto 26px;color:var(--fg-dim);font-size:16px}
 
   /* ---------------------------------------------------------- footer */
-  footer{padding:34px 0 46px;border-top:1px solid var(--border);text-align:center}
-  footer .fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;font-size:13.5px}
+  footer{padding:38px 0 48px;border-top:1px solid var(--border);text-align:center}
+  footer .fl{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin-bottom:15px;font-size:13.5px}
   footer .cp{font-size:12.5px;color:var(--fg-dim)}
+
+  /* ---------------------------------------------------------- reveal */
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .rv{opacity:1;transform:none}
+  }
 
   @media(max-width:640px){
     .bar .tag{display:none}
-    .hero{padding:44px 0 38px}
+    .hero{padding:48px 0 40px}
     .btn{width:100%;justify-content:center}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    section{padding:52px 0}
   }
 </style>
 </head>
 <body>
+
+<div class="aura"><i></i><i></i></div>
 
 <header>
   <div class="wrap bar">
@@ -156,6 +347,7 @@
     <span class="nm">CodeLite</span>
     <span class="tag">offline code editor</span>
     <span class="sp">
+      <a class="lnk" href="#demo">Demo</a>
       <a class="lnk" href="#features">Features</a>
       <a class="lnk" href="#faq">FAQ</a>
       <a class="lnk" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC">GitHub</a>
@@ -166,141 +358,168 @@
 
 <div class="wrap">
 
+  <!-- ==================================================== hero -->
   <div class="hero">
     <span class="pill"><i></i> No telemetry &middot; No accounts &middot; No tracking</span>
-    <h1>A code editor that <br>leaves you <em>alone</em>.</h1>
+    <h1>The editor that <br>leaves you <em>alone</em>.</h1>
+    <div class="typewrap"><span id="type"></span><span class="caret"></span></div>
     <p class="sub">
-      Lightweight, fully offline editor for Windows. Syntax highlighting for 30+
-      languages, minimap, command palette and real folder access &mdash; under
-      100&nbsp;KB of code, with nothing phoning home.
+      A lightweight, fully offline code editor for Windows. Thirty-plus languages,
+      a real minimap, a command palette and regex search &mdash; in under 100&nbsp;KB
+      of code that never phones home.
     </p>
 
-    <div class="cta" style="margin-bottom:20px">
+    <div class="cta">
       <a class="btn main" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe">
-        &#11015; Download the installer <small>20.7 MB &middot; Windows 10/11 &middot; no admin needed</small>
+        &#11015; Download the installer <small>20.7 MB &middot; no admin needed</small>
       </a>
+      <a class="btn ghost" href="#demo">&#9654; Watch it work</a>
+    </div>
+    <p class="meta">Windows 10/11 &middot; version <b>1.0.0</b> &middot;
+      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases">all releases</a>
+      &middot; <a href="docs/USER-GUIDE-EN.txt">user guide</a></p>
+
+    <div class="stats rv">
+      <div class="stat"><div class="v" data-count="30" data-suffix="+">0</div><div class="k">Languages</div></div>
+      <div class="stat"><div class="v" data-count="19">0</div><div class="k">Palette commands</div></div>
+      <div class="stat"><div class="v" data-count="3">0</div><div class="k">Themes</div></div>
+      <div class="stat"><div class="v" data-count="100" data-suffix=" KB">0</div><div class="k">Total code</div></div>
+      <div class="stat"><div class="v" data-count="0">0</div><div class="k">Network calls</div></div>
+    </div>
+  </div>
+
+  <!-- ==================================================== demo -->
+  <section id="demo">
+    <div class="eyebrow rv">See it in action</div>
+    <h2 class="rv">Not a screenshot. The real thing.</h2>
+    <p class="lead rv">CodeLite typing out a file, then finding every match across the project.</p>
+
+    <div class="mock rv">
+      <div class="mock-bar">
+        <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+        <span class="mock-title" id="mockTitle">app.js &mdash; CodeLite</span>
+      </div>
+      <div class="mock-body">
+        <div class="gut" id="gut"></div>
+        <div class="code" id="code"></div>
+      </div>
+      <div class="panel" id="panel">
+        <span>&#128269; Find</span>
+        <span class="fld" id="findField">await</span>
+        <span class="chip">Aa</span><span class="chip">ab</span><span class="chip">.*</span>
+        <span class="hits" id="hits"></span>
+      </div>
+    </div>
+    <p class="caption rv" id="cap">&mdash;</p>
+  </section>
+
+  <!-- ==================================================== showcase -->
+  <section>
+    <div class="eyebrow rv">The interface</div>
+    <h2 class="rv">Dark, light, or maximum contrast</h2>
+    <p class="lead rv">Every screenshot below is the real application, captured on Windows.</p>
+
+    <div class="tabs rv" id="shotTabs">
+      <button class="tab on" data-i="0">Editor</button>
+      <button class="tab" data-i="1">Welcome</button>
+      <button class="tab" data-i="2">Find &amp; replace</button>
+      <button class="tab" data-i="3">Light theme</button>
     </div>
 
-    <p class="meta">
-      Windows 10/11 &middot; version <b>1.0.0</b> &middot;
-      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases">all releases</a> &middot;
-      <a href="docs/CHANGELOG.md">changelog</a> &middot;
-      <a href="docs/USER-GUIDE-EN.txt">user guide</a>
-    </p>
-  </div>
+    <div class="stage rv">
+      <figure class="on"><img src="docs/screenshots/editor-dark.png" alt="CodeLite editor in the dark theme">
+        <figcaption>Editor in the Dark+ theme, with the minimap and the project tree open.</figcaption></figure>
+      <figure><img src="docs/screenshots/welcome.png" alt="CodeLite welcome screen">
+        <figcaption>The welcome screen: open a folder, start a new file, or pick up where you left off.</figcaption></figure>
+      <figure><img src="docs/screenshots/find-replace.png" alt="Find and replace">
+        <figcaption>Find and replace with regex, match-case and whole-word modes side by side.</figcaption></figure>
+      <figure><img src="docs/screenshots/editor-light.png" alt="CodeLite in the light theme">
+        <figcaption>The same workspace in the Light+ theme.</figcaption></figure>
+    </div>
+  </section>
 
   <!-- ==================================================== features -->
   <section id="features">
-    <h2>What is inside</h2>
-    <div class="grid">
-      <div class="card">
-        <div class="ic">&#9998;</div>
-        <h3>Syntax highlighting, 30+ languages</h3>
-        <p>JavaScript, TypeScript, Python, Java, C, C++, C#, Go, Rust, PHP,
-           Ruby, SQL, HTML, CSS, YAML, TOML, Markdown, Shell, PowerShell and more.</p>
-      </div>
-      <div class="card">
-        <div class="ic">&#9635;</div>
-        <h3>Minimap &amp; outline</h3>
-        <p>Click-to-jump minimap with a viewport indicator, plus an outline of
-           every function, class and heading in the open file.</p>
-      </div>
-      <div class="card">
-        <div class="ic">&#128269;</div>
-        <h3>Find and replace</h3>
-        <p>Regex, match-case and whole-word modes. Every match lights up in the
-           editor as you type, with project-wide search and click-to-jump.</p>
-      </div>
-      <div class="card">
-        <div class="ic">&#9889;</div>
-        <h3>Command palette</h3>
-        <p>19 commands behind <code>Ctrl + Shift + P</code>. Quick open any file
-           by name with fuzzy matching using <code>Ctrl + P</code>.</p>
-      </div>
-      <div class="card">
-        <div class="ic">&#128193;</div>
-        <h3>Real folder access</h3>
-        <p>Opens a real directory through the File System Access API, with lazy
-           loading so huge projects start instantly. Full read and write.</p>
-      </div>
-      <div class="card">
-        <div class="ic">&#127912;</div>
-        <h3>Three themes</h3>
-        <p>VS Code inspired Dark+, Light+ and High Contrast. Font size, tab
-           width, word wrap and minimap are all adjustable and remembered.</p>
-      </div>
+    <div class="eyebrow rv">Everything included</div>
+    <h2 class="rv">Built for people who just want to type</h2>
+    <p class="lead rv">No account to create, no extension marketplace to browse, no sync to wait on.</p>
+
+    <div class="grid rv">
+      <div class="card"><div class="ic">&#9998;</div><h3>Highlighting for 30+ languages</h3>
+        <p>JavaScript, TypeScript, Python, Java, C, C++, C#, Go, Rust, PHP, Ruby, SQL, HTML, CSS, YAML, TOML, Markdown, Shell, PowerShell and more.</p></div>
+      <div class="card"><div class="ic">&#9635;</div><h3>Minimap and outline</h3>
+        <p>A click-to-jump minimap with a live viewport marker, plus an outline listing every function, class and heading.</p></div>
+      <div class="card"><div class="ic">&#128269;</div><h3>Regex find and replace</h3>
+        <p>Regex, match-case and whole-word modes. Every hit lights up as you type, with project-wide search and click-to-jump.</p></div>
+      <div class="card"><div class="ic">&#9889;</div><h3>Command palette</h3>
+        <p>19 commands behind <code>Ctrl + Shift + P</code>. Quick open any file by name with fuzzy matching using <code>Ctrl + P</code>.</p></div>
+      <div class="card"><div class="ic">&#128193;</div><h3>Opens real folders</h3>
+        <p>A real directory through the File System Access API, lazily loaded so even huge projects open instantly. Full read and write.</p></div>
+      <div class="card"><div class="ic">&#128203;</div><h3>Multi-tab editing</h3>
+        <p>Unsaved-change indicators, automatic indent, bracket closing and selection wrapping, all remembered per session.</p></div>
+      <div class="card"><div class="ic">&#127912;</div><h3>Three themes</h3>
+        <p>VS Code inspired Dark+, Light+ and High Contrast. Font size, tab width, word wrap and minimap are all adjustable.</p></div>
+      <div class="card"><div class="ic">&#128274;</div><h3>Offline by design</h3>
+        <p>Zero network calls after install. The bundled server binds to <code>127.0.0.1</code> only and never leaves your machine.</p></div>
     </div>
   </section>
 
-  <!-- ==================================================== shots -->
+  <!-- ==================================================== compare -->
   <section>
-    <h2>Screens</h2>
-    <div class="shots">
-      <figure class="shot">
-        <img src="docs/screenshots/editor-dark.png" alt="CodeLite in the dark theme">
-        <figcaption class="cap">Editor in the Dark+ theme</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="docs/screenshots/welcome.png" alt="CodeLite welcome screen">
-        <figcaption class="cap">Welcome screen</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="docs/screenshots/find-replace.png" alt="Find and replace">
-        <figcaption class="cap">Find and replace with regex</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="docs/screenshots/editor-light.png" alt="CodeLite in the light theme">
-        <figcaption class="cap">Editor in the Light+ theme</figcaption>
-      </figure>
+    <div class="eyebrow rv">Why not the big one?</div>
+    <h2 class="rv">The trade-off, stated plainly</h2>
+    <p class="lead rv">CodeLite is not trying to be Visual Studio Code. It is the editor you open when you want the file open and nothing else.</p>
+
+    <div class="cmp rv">
+      <div class="row head"><span></span><span>CodeLite</span><span>VS Code</span></div>
+      <div class="row"><span>Install size</span><span class="yes">20.7 MB</span><span class="no">~100 MB</span></div>
+      <div class="row"><span>Startup on a large folder</span><span class="yes">Lazy, instant</span><span class="no">Scans everything</span></div>
+      <div class="row"><span>Telemetry</span><span class="yes">None</span><span class="no">On by default</span></div>
+      <div class="row"><span>Account required</span><span class="yes">No</span><span class="no">Optional</span></div>
+      <div class="row"><span>Extension marketplace</span><span class="no">No</span><span class="yes">Yes</span></div>
+      <div class="row"><span>Languages out of the box</span><span class="yes">30+</span><span class="yes">Via extensions</span></div>
+      <div class="row"><span>Works fully offline</span><span class="yes">Yes</span><span class="no">Partly</span></div>
     </div>
   </section>
 
-  <!-- ==================================================== code -->
+  <!-- ==================================================== languages -->
   <section>
-    <h2>Built to stay small</h2>
-    <pre><span class="com">// app.js - tab creation, no framework, no bundler</span>
-<span class="kw">function</span> <span class="fn">openFile</span>(handle, path) {
-  <span class="kw">const</span> file = <span class="kw">await</span> handle.<span class="fn">getFile</span>();
-  <span class="kw">const</span> text  = <span class="kw">await</span> file.<span class="fn">text</span>();
-  <span class="kw">const</span> tab   = <span class="fn">createTab</span>(file.name);
-  editor.<span class="fn">setValue</span>(text);
-  editor.<span class="fn">highlight</span>(text, file.name);
-  <span class="fn">renderOutline</span>(text);
-  <span class="fn">renderMinimap</span>(text);
-}</pre>
+    <div class="eyebrow rv">Supported languages</div>
+    <h2 class="rv">Thirty-plus, out of the box</h2>
+    <p class="lead rv">Anything else still opens as plain text, so you are never locked out of a file.</p>
+    <div class="marq rv">
+      <div class="track" id="track"></div>
+    </div>
   </section>
 
   <!-- ==================================================== faq -->
   <section id="faq">
-    <h2>Questions</h2>
-    <div class="faq">
-      <details>
-        <summary>Does it need an internet connection?</summary>
-        <p>No. Once installed it makes zero network calls. No telemetry, no
-           analytics, no update pings. The bundled local server binds to
-           <code>127.0.0.1</code> only and validates every request path against
-           the install directory.</p>
-      </details>
-      <details>
-        <summary>Why does it need a small local server?</summary>
-        <p>Only so the browser treats it as a secure origin. Browsers block
-           folder and file access on <code>file://</code> pages, so CodeLite
-           serves itself from <code>localhost</code> and opens there. It is not
-           reachable from your network.</p>
-      </details>
-      <details>
-        <summary>How do I install it?</summary>
-        <p>Download the installer above and double click it. It is a per-user
-           install, so it never asks for administrator privileges. You choose
-           whether to create Desktop and Start Menu shortcuts, then launch
-           CodeLite like any other program.</p>
-      </details>
-      <details>
-        <summary>Which browsers does it use?</summary>
-        <p>Edge and Chrome. Folder access uses the File System Access API, which
-           those two implement fully, so CodeLite opens in a dedicated app window
-           rather than an ordinary browser tab.</p>
-      </details>
+    <div class="eyebrow rv">Questions</div>
+    <h2 class="rv">Straight answers</h2>
+    <div class="faq rv">
+      <details><summary>Does it need an internet connection?</summary>
+        <p>No. After install it makes zero network calls &mdash; no telemetry, no analytics, no update ping. You can unplug the cable and it behaves identically.</p></details>
+      <details><summary>Why does it start a small local server?</summary>
+        <p>Only so the browser treats it as a secure origin. Browsers block folder and file access on <code>file://</code> pages, so CodeLite serves itself from <code>localhost</code> and opens there. It is not reachable from your network.</p></details>
+      <details><summary>How do I install it?</summary>
+        <p>Download the installer, double click it, choose your shortcuts, done. It is a per-user install and never asks for administrator rights.</p></details>
+      <details><summary>Which browsers does it use?</summary>
+        <p>Edge and Chrome. Folder access relies on the File System Access API, which those two implement fully, so CodeLite opens in a dedicated app window rather than a normal tab.</p></details>
+      <details><summary>Will Windows warn me about the download?</summary>
+        <p>Yes, the installer is not code-signed yet, so SmartScreen may show a warning the first time. Click <strong>More info &rarr; Run anyway</strong>.</p></details>
+      <details><summary>Can I open a project outside my Documents folder?</summary>
+        <p>Yes. You pick the folder and the browser asks you to confirm once. Nothing is uploaded anywhere &mdash; the files stay on your disk.</p></details>
+    </div>
+  </section>
+
+  <!-- ==================================================== final cta -->
+  <section>
+    <div class="band rv">
+      <h2>Try it on your own code</h2>
+      <p>One installer, no account, no configuration. Point it at a folder and start typing.</p>
+      <a class="btn main" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe">
+        &#11015; Download the installer <small>20.7 MB &middot; Windows 10/11</small>
+      </a>
     </div>
   </section>
 
@@ -309,6 +528,7 @@
     <div class="fl">
       <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC">Source code</a>
       <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe">Download</a>
+      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases">Releases</a>
       <a href="docs/CHANGELOG.md">Changelog</a>
       <a href="docs/USER-GUIDE-EN.txt">User guide</a>
       <a href="docs/USER-GUIDE-HI.txt">हिंदी गाइड</a>
@@ -320,21 +540,190 @@
 
 <script>
 (function () {
-  var K = "codelite_landing_theme";
-  var root = document.documentElement;
+  "use strict";
+  var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------------------------------------------------------- theme */
+  var K = "codelite_landing_theme", root = document.documentElement;
   try {
     var saved = localStorage.getItem(K);
     if (saved === "light" || saved === "dark") root.dataset.theme = saved;
     else if (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches)
       root.dataset.theme = "light";
   } catch (e) {}
-
-  var btn = document.getElementById("tgl");
-  btn.onclick = function () {
+  document.getElementById("tgl").onclick = function () {
     var next = root.dataset.theme === "light" ? "dark" : "light";
     root.dataset.theme = next;
     try { localStorage.setItem(K, next); } catch (e) {}
   };
+
+  /* ---------------------------------------------------------- typing headline */
+  var PHRASES = [
+    "syntax highlighting for 30+ languages",
+    "a minimap you can actually click",
+    "regex find and replace",
+    "a command palette with 19 commands",
+    "folders that open instantly",
+    "zero network calls, ever"
+  ];
+  var typeEl = document.getElementById("type");
+  if (reduced) {
+    typeEl.textContent = PHRASES[0];
+  } else {
+    (function () {
+      var p = 0, i = 0, del = false;
+      (function tick() {
+        var word = PHRASES[p];
+        typeEl.textContent = del ? word.slice(0, --i) : word.slice(0, ++i);
+        var wait = del ? 26 : 46;
+        if (!del && i === word.length) { wait = 1500; del = true; }
+        else if (del && i === 0) { del = false; p = (p + 1) % PHRASES.length; wait = 320; }
+        setTimeout(tick, wait);
+      })();
+    })();
+  }
+
+  /* ---------------------------------------------------------- editor demo */
+  var LINES = [
+    '<span class="k">async function</span> <span class="f">openFolder</span>(handle) {',
+    '  <span class="k">const</span> root = <span class="k">await</span> handle.<span class="f">getDirectoryHandle</span>(<span class="s">"src"</span>);',
+    '',
+    '  <span class="k">for await</span> (<span class="k">const</span> entry <span class="k">of</span> root.<span class="f">values</span>()) {',
+    '    <span class="k">const</span> path = <span class="s">`src/</span><span class="t">${</span>entry.name<span class="t">}</span><span class="s">`</span>;',
+    '',
+    '    <span class="k">if</span> (<span class="f">SKIP</span>.has(entry.name)) <span class="k">continue</span>;  <span class="c">// .git, node_modules</span>',
+    '',
+    '    <span class="k">await</span> <span class="f">addToTree</span>(entry, path);',
+    '  }',
+    '',
+    '  <span class="f">renderTree</span>();',
+    '}'
+  ];
+  var CAPTIONS = [
+    "Opens a real folder, lazily, skipping .git and node_modules.",
+    "Every file, every language, highlighted as you type.",
+    "Full read and write — nothing leaves your disk."
+  ];
+  var gutEl = document.getElementById("gut"), codeEl = document.getElementById("code"),
+      capEl = document.getElementById("cap"), hitsEl = document.getElementById("hits"),
+      fieldEl = document.getElementById("findField"), panelEl = document.getElementById("panel"),
+      titleEl = document.getElementById("mockTitle");
+
+  function paint(n, caretLine) {
+    gutEl.innerHTML = LINES.map(function (_, i) {
+      return '<b class="' + (i === caretLine ? "on" : "") + '">' + (i + 1) + "</b>";
+    }).join("");
+    var out = LINES.slice(0, n).map(function (l) { return l || " "; }).join("\n");
+    if (n < LINES.length) out += "<span class='blink'>▌</span>";
+    codeEl.innerHTML = out;
+    capEl.textContent = CAPTIONS[Math.min(2, Math.floor((n / LINES.length) * 3))];
+  }
+
+  var step = 0;
+  function typeStep() {
+    step++;
+    if (step <= LINES.length) {
+      paint(step, step - 1);
+      setTimeout(typeStep, 240);
+      return;
+    }
+    // typing done -> switch to the search panel, then loop
+    setTimeout(function () {
+      titleEl.textContent = "app.js — CodeLite";
+      panelEl.style.borderTopColor = "var(--accent)";
+      fieldEl.textContent = "await";
+      hitsEl.textContent = "6 results";
+      capEl.textContent = "Then Ctrl + H finds every match across the project.";
+      var n = 0;
+      var id = setInterval(function () {
+        n++;
+        if (n > 40) {
+          clearInterval(id);
+          hitsEl.textContent = "";
+          capEl.textContent = "";
+          panelEl.style.borderTopColor = "";
+          paint(0, 0);
+          step = 0;
+          setTimeout(typeStep, 700);
+        }
+      }, 60);
+    }, 900);
+  }
+  if (reduced) { paint(LINES.length, -1); capEl.textContent = CAPTIONS[0]; }
+  else typeStep();
+
+  /* ---------------------------------------------------------- screenshot tabs */
+  var shotTabs = document.getElementById("shotTabs");
+  var figs = document.querySelectorAll(".stage figure");
+  var auto = null, idx = 0;
+  function pick(n) {
+    idx = n;
+    figs.forEach(function (f, i) { f.classList.toggle("on", i === n); });
+    Array.prototype.forEach.call(shotTabs.children, function (b, i) {
+      b.classList.toggle("on", i === n);
+    });
+  }
+  Array.prototype.forEach.call(shotTabs.children, function (b, i) {
+    b.onclick = function () { pick(i); restart(); };
+  });
+  function restart() {
+    clearInterval(auto);
+    auto = setInterval(function () { pick((idx + 1) % figs.length); }, 4600);
+  }
+  if (!reduced) restart();
+
+  /* ---------------------------------------------------------- language marquee */
+  var LANGS = ["JavaScript","TypeScript","JSX","Python","Java","C","C++","C#","Go","Rust",
+    "PHP","Ruby","SQL","HTML","CSS","SCSS","Less","JSON","YAML","TOML","XML","SVG",
+    "Markdown","Shell","PowerShell","Batch","Lua","Dart","Swift","Kotlin","Perl","R",
+    "Dockerfile","INI"];
+  var html = LANGS.map(function (l) {
+    return '<span class="tag">' + l + "</span>";
+  }).join("");
+  document.getElementById("track").innerHTML = html + html;
+
+  /* ---------------------------------------------------------- scroll reveal + counters */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      if (el.dataset.counted) { io.unobserve(el); return; }
+      el.dataset.counted = "1";
+      countUp(el);
+      io.unobserve(el);
+    });
+  }, { threshold: .35 });
+
+  function countUp(el) {
+    var target = parseInt(el.dataset.count, 10) || 0;
+    var suffix = el.dataset.suffix || "";
+    if (reduced || target === 0) { el.textContent = target + suffix; return; }
+    var t0 = null, dur = 1100;
+    (function step(ts) {
+      if (!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur);
+      var eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (k < 1) requestAnimationFrame(step);
+      else el.textContent = target + suffix;
+    })(performance.now());
+  }
+
+  var revealIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); }
+    });
+  }, { threshold: .12 });
+
+  document.querySelectorAll(".rv").forEach(function (el) { revealIO.observe(el); });
+  document.querySelectorAll("[data-count]").forEach(function (el) { io.observe(el); });
+
+  /* light up the stat row once it scrolls into view even if already seen */
+  setTimeout(function () {
+    document.querySelectorAll(".stats [data-count]").forEach(function (el) {
+      if (!el.dataset.counted) { el.dataset.counted = "1"; countUp(el); }
+    });
+  }, 1400);
 })();
 </script>
 </body>
