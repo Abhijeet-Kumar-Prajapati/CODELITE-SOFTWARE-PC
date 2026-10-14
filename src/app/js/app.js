@@ -5,6 +5,13 @@
 (function () {
   'use strict';
 
+  /* True only for the installed build, which START CodeLite.bat serves
+     from http://localhost:<port> so the browser treats it as a secure
+     origin. A hosted or file:// copy has no server behind it, so the
+     app must not try to shut one down. */
+  var LOCAL_APP = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?(\/|$)/i
+    .test(location.href);
+
   /* ---------- element refs ---------- */
   var $ = function (id) { return document.getElementById(id); };
   var el = {
@@ -852,9 +859,12 @@
   function exitApp() {
     var dirty = tabs.filter(function (t) { return t.dirty; });
     var go = function () {
-      try {
-        fetch('/shutdown', { method: 'POST' }).catch(function () { });
-      } catch (e) { }
+      // only the installed build has a server listening to stop
+      if (LOCAL_APP) {
+        try {
+          fetch('/shutdown', { method: 'POST' }).catch(function () { });
+        } catch (e) { }
+      }
       setTimeout(function () { window.close(); }, 120);
     };
     if (dirty.length) {
@@ -1019,6 +1029,12 @@
     applySettings(); openSettings();
   });
   el.btnExit.addEventListener('click', exitApp);
+  // a hosted or file:// copy has no local server behind it, so be honest
+  // about what the button actually does
+  if (!LOCAL_APP) {
+    el.btnExit.title = 'Close CodeLite (this browser tab)';
+    el.btnExit.textContent = 'Close';
+  }
 
   Array.prototype.forEach.call(el.activitybar.querySelectorAll('.act[data-view]'), function (b) {
     b.addEventListener('click', function () {
