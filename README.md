@@ -12,9 +12,36 @@ No telemetry. No accounts. No tracking. Under 100 KB of code.
 [![Offline](https://img.shields.io/badge/network-offline-4CAF50)]()
 [![Version](https://img.shields.io/badge/version-1.0.0-8A2BE2)](docs/CHANGELOG.md)
 
-[**Download the installer**](/releases) · [**User guide**](docs/USER-GUIDE-EN.txt)
+**[🌐 Try it in the browser](https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/)** · **[💾 Download](https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download)** · [**User guide**](docs/USER-GUIDE-EN.txt)
+
+| | | |
+|---|---|---|
+| <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe"><img src="https://img.shields.io/badge/Download-Windows%20Installer-0e639c?style=for-the-badge" alt="Download Windows installer"></a> | <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Portable-1.0.0.zip"><img src="https://img.shields.io/badge/Download-Portable%20ZIP-6a9955?style=for-the-badge" alt="Download portable ZIP"></a> | <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases"><img src="https://img.shields.io/badge/Releases-1.0.0-8b8b8b?style=for-the-badge" alt="All releases"></a> |
+| Windows installer · 20.7 MB · per-user, no admin | Portable ZIP · 61 KB · unzip and run, nothing to install | Every version, with changelogs |
+
+> The download links above always point at the newest release, so they never
+> go stale. Prefer the portable ZIP if you would rather not install anything.
 
 </div>
+
+---
+
+## 📥 Download
+
+**No build step, no package manager, no setup.** Grab a file and start editing.
+
+| Build | Size | How to use |
+|---|---|---|
+| **Windows installer** | 20.7 MB | Double click, pick shortcuts, done. Per-user, never asks for admin rights. |
+| **Portable ZIP** | 61 KB | Unzip anywhere, then run `START CodeLite.bat`. Keeps everything in one folder. |
+
+- **Release page** — <https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases>
+- **Live in the browser** — <https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/> (works in Chrome and Edge)
+- **Project page with screenshots** — <https://abhijeet-kumar-prajapati.github.io/CODELITE-SOFTWARE-PC/#download>
+
+Both builds contain the same editor. The installer adds shortcuts and
+uninstall support; the portable build stays a single self-contained folder you
+can keep on a USB stick.
 
 ---
 

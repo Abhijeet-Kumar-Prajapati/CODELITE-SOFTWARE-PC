@@ -8,7 +8,7 @@
 #define AppNameLower   "codelite"
 #define AppVersion     "1.0.0"
 #define AppPublisher   "CodeLite Project"
-#define AppURL         "https://github.com/YOUR-USERNAME/CodeLite"
+#define AppURL         "https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC"
 #define AppExeName     "START CodeLite.bat"
 #define AppMutexName   "CodeLiteSetup"
 

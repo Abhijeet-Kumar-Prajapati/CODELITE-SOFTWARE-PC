@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeLite — a lightweight, fully offline code editor for Windows</title>
+<meta name="description" content="A lightweight, fully offline code editor for Windows. No telemetry, no accounts, no tracking. 30+ languages, minimap, command palette, find and replace. Under 100 KB of code.">
+<link rel="icon" href="src/build/codelite.ico" sizes="any">
+<style>
+  :root{
+    --bg:#1e1e1e; --bg-alt:#252526; --bg-deep:#181818; --panel:#333333;
+    --fg:#d4d4d4; --fg-dim:#8b8b8b; --fg-bright:#e8e8e8;
+    --border:#2b2b2b; --border-soft:#333;
+    --accent:#0e639c; --accent-hover:#1177bb;
+    --ok:#73c991; --kw:#569cd6; --str:#ce9178; --num:#b5cea8; --com:#6a9955; --fn:#dcdcaa;
+    --font-ui:"Segoe UI",system-ui,-apple-system,sans-serif;
+    --font-mono:"Cascadia Code","Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#ffffff; --bg-alt:#f3f3f3; --bg-deep:#f8f8f8; --panel:#f3f3f3;
+    --fg:#3b3b3b; --fg-dim:#767676; --fg-bright:#1f1f1f;
+    --border:#e5e5e5; --border-soft:#e5e5e5;
+    --accent:#0e639c; --accent-hover:#1177bb;
+    --ok:#388a34; --kw:#0000ff; --str:#a31515; --num:#098658; --com:#008000; --fn:#795e26;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:var(--font-ui); font-size:15px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--kw);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+
+  /* ---------------------------------------------------------- header */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .bar{display:flex;align-items:center;gap:14px;height:56px}
+  .bar img{width:28px;height:28px;border-radius:6px}
+  .bar .nm{font-weight:600;color:var(--fg-bright);letter-spacing:-.2px}
+  .bar .tag{font-size:12px;color:var(--fg-dim);border-left:1px solid var(--border);padding-left:14px}
+  .bar .sp{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .lnk{font-size:13px;color:var(--fg-dim);padding:6px 10px;border-radius:6px;transition:.15s}
+  .lnk:hover{color:var(--fg-bright);background:var(--panel);text-decoration:none}
+  .tgl{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;color:var(--fg-dim);cursor:pointer;
+    background:var(--panel);border:1px solid var(--border);border-radius:6px;transition:.15s
+  }
+  .tgl:hover{color:var(--fg-bright);border-color:var(--accent)}
+
+  /* ---------------------------------------------------------- hero */
+  .hero{padding:66px 0 54px;text-align:center}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:5px 13px;margin-bottom:22px;
+    font-size:12px;color:var(--fg-dim);
+    background:var(--bg-alt);border:1px solid var(--border);border-radius:20px
+  }
+  .pill i{width:6px;height:6px;border-radius:50%;background:var(--ok);display:block}
+  h1{
+    font-size:clamp(34px,6vw,54px);font-weight:700;letter-spacing:-1.6px;
+    color:var(--fg-bright);line-height:1.1;margin-bottom:16px
+  }
+  h1 em{font-style:normal;color:var(--accent-hover)}
+  .sub{max-width:610px;margin:0 auto 32px;font-size:17px;color:var(--fg-dim)}
+
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:12px 22px;font-size:14.5px;font-weight:600;
+    border-radius:7px;border:1px solid transparent;cursor:pointer;
+    transition:transform .14s, filter .14s, border-color .14s
+  }
+  .btn:hover{transform:translateY(-2px);text-decoration:none}
+  .btn.main{background:var(--accent);color:#fff}
+  .btn.main:hover{background:var(--accent-hover)}
+  .btn.ghost{background:var(--bg-alt);color:var(--fg);border-color:var(--border)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--fg-bright)}
+  .btn small{font-weight:400;opacity:.72;font-size:12px}
+  .meta{font-size:12.5px;color:var(--fg-dim)}
+  .meta b{color:var(--fg)}
+
+  /* ---------------------------------------------------------- sections */
+  section{padding:52px 0;border-top:1px solid var(--border)}
+  h2{
+    font-size:13px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--fg-dim);margin-bottom:28px;text-align:center
+  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:14px}
+  .card{
+    padding:20px;background:var(--bg-alt);
+    border:1px solid var(--border);border-radius:10px;
+    transition:border-color .16s, transform .16s
+  }
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card .ic{
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;background:var(--panel);border-radius:7px;margin-bottom:12px
+  }
+  .card h3{font-size:14.5px;color:var(--fg-bright);margin-bottom:6px;font-weight:600}
+  .card p{font-size:13.2px;color:var(--fg-dim);line-height:1.6}
+
+  /* ---------------------------------------------------------- shots */
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .shot{background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .shot img{width:100%;display:block;border-bottom:1px solid var(--border)}
+  .shot .cap{padding:11px 14px;font-size:12.5px;color:var(--fg-dim)}
+
+  /* ---------------------------------------------------------- code */
+  pre{
+    background:var(--bg-deep);border:1px solid var(--border);border-radius:10px;
+    padding:18px 20px;overflow-x:auto;
+    font-family:var(--font-mono);font-size:13px;line-height:1.65
+  }
+  .kw{color:var(--kw)} .str{color:var(--str)} .num{color:var(--num)}
+  .com{color:var(--com)} .fn{color:var(--fn)} .dim{color:var(--fg-dim)}
+
+  /* ---------------------------------------------------------- faq */
+  .faq{max-width:720px;margin:0 auto}
+  details{
+    background:var(--bg-alt);border:1px solid var(--border);
+    border-radius:9px;padding:14px 18px;margin-bottom:10px
+  }
+  summary{cursor:pointer;color:var(--fg-bright);font-size:14.5px;font-weight:600;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"\25B8";display:inline-block;width:18px;color:var(--accent);transition:transform .16s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details p{margin-top:11px;font-size:13.6px;color:var(--fg-dim);padding-left:18px}
+  details code,.card code{font-family:var(--font-mono);font-size:12.5px;background:var(--panel);padding:1px 5px;border-radius:4px}
+
+  /* ---------------------------------------------------------- footer */
+  footer{padding:34px 0 46px;border-top:1px solid var(--border);text-align:center}
+  footer .fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;font-size:13.5px}
+  footer .cp{font-size:12.5px;color:var(--fg-dim)}
+
+  @media(max-width:640px){
+    .bar .tag{display:none}
+    .hero{padding:44px 0 38px}
+    .btn{width:100%;justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <img src="docs/logo.png" alt="CodeLite logo">
+    <span class="nm">CodeLite</span>
+    <span class="tag">offline code editor</span>
+    <span class="sp">
+      <a class="lnk" href="#features">Features</a>
+      <a class="lnk" href="#faq">FAQ</a>
+      <a class="lnk" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC">GitHub</a>
+      <button class="tgl" id="tgl" title="Switch theme" aria-label="Switch theme">&#9681;</button>
+    </span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill"><i></i> No telemetry &middot; No accounts &middot; No tracking</span>
+    <h1>A code editor that<br>leaves you <em>alone</em>.</h1>
+    <p class="sub">
+      Lightweight, fully offline editor for Windows. Syntax highlighting for 30+
+      languages, minimap, command palette and real folder access &mdash; under
+      100&nbsp;KB of code, with nothing phoning home.
+    </p>
+
+    <div class="cta">
+      <a class="btn main" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe">
+        &#11015; Download for Windows <small>20.7 MB &middot; .exe</small>
+      </a>
+      <a class="btn ghost" href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Portable-1.0.0.zip">
+        &#128230; Portable ZIP <small>61 KB &middot; no install</small>
+      </a>
+    </div>
+    <div class="cta" style="margin-bottom:18px">
+      <a class="btn ghost" href="src/app/">&#128193; Try it in your browser</a>
+    </div>
+
+    <p class="meta">
+      Windows 10/11 &middot; version <b>1.0.0</b> &middot;
+      <a href="docs/CHANGELOG.md">changelog</a> &middot;
+      <a href="docs/USER-GUIDE-EN.txt">user guide</a> &middot;
+      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases">all releases</a>
+    </p>
+  </div>
+
+  <!-- ==================================================== features -->
+  <section id="features">
+    <h2>What is inside</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">&#9998;</div>
+        <h3>Syntax highlighting, 30+ languages</h3>
+        <p>JavaScript, TypeScript, Python, Java, C, C++, C#, Go, Rust, PHP,
+           Ruby, SQL, HTML, CSS, YAML, TOML, Markdown, Shell, PowerShell and more.</p>
+      </div>
+      <div class="card">
+        <div class="ic">&#9635;</div>
+        <h3>Minimap &amp; outline</h3>
+        <p>Click-to-jump minimap with a viewport indicator, plus an outline of
+           every function, class and heading in the open file.</p>
+      </div>
+      <div class="card">
+        <div class="ic">&#128269;</div>
+        <h3>Find and replace</h3>
+        <p>Regex, match-case and whole-word modes. Every match lights up in the
+           editor as you type, with project-wide search and click-to-jump.</p>
+      </div>
+      <div class="card">
+        <div class="ic">&#9889;</div>
+        <h3>Command palette</h3>
+        <p>19 commands behind <code>Ctrl + Shift + P</code>. Quick open any file
+           by name with fuzzy matching using <code>Ctrl + P</code>.</p>
+      </div>
+      <div class="card">
+        <div class="ic">&#128193;</div>
+        <h3>Real folder access</h3>
+        <p>Opens a real directory through the File System Access API, with lazy
+           loading so huge projects start instantly. Full read and write.</p>
+      </div>
+      <div class="card">
+        <div class="ic">&#127912;</div>
+        <h3>Three themes</h3>
+        <p>VS Code inspired Dark+, Light+ and High Contrast. Font size, tab
+           width, word wrap and minimap are all adjustable and remembered.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================== shots -->
+  <section>
+    <h2>Screens</h2>
+    <div class="shots">
+      <figure class="shot">
+        <img src="docs/screenshots/editor-dark.png" alt="CodeLite in the dark theme">
+        <figcaption class="cap">Editor in the Dark+ theme</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="docs/screenshots/welcome.png" alt="CodeLite welcome screen">
+        <figcaption class="cap">Welcome screen</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="docs/screenshots/find-replace.png" alt="Find and replace">
+        <figcaption class="cap">Find and replace with regex</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="docs/screenshots/editor-light.png" alt="CodeLite in the light theme">
+        <figcaption class="cap">Editor in the Light+ theme</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ==================================================== code -->
+  <section>
+    <h2>Built to stay small</h2>
+    <pre><span class="com">// app.js - tab creation, no framework, no bundler</span>
+<span class="kw">function</span> <span class="fn">openFile</span>(handle, path) {
+  <span class="kw">const</span> file = <span class="kw">await</span> handle.<span class="fn">getFile</span>();
+  <span class="kw">const</span> text  = <span class="kw">await</span> file.<span class="fn">text</span>();
+  <span class="kw">const</span> tab   = <span class="fn">createTab</span>(file.name);
+  editor.<span class="fn">setValue</span>(text);
+  editor.<span class="fn">highlight</span>(text, file.name);
+  <span class="fn">renderOutline</span>(text);
+  <span class="fn">renderMinimap</span>(text);
+}</pre>
+  </section>
+
+  <!-- ==================================================== faq -->
+  <section id="faq">
+    <h2>Questions</h2>
+    <div class="faq">
+      <details>
+        <summary>Does it need an internet connection?</summary>
+        <p>No. Once installed it makes zero network calls. No telemetry, no
+           analytics, no update pings. The bundled local server binds to
+           <code>127.0.0.1</code> only and validates every request path against
+           the install directory.</p>
+      </details>
+      <details>
+        <summary>Why does it need a small local server?</summary>
+        <p>Only so the browser treats it as a secure origin. Browsers block
+           folder and file access on <code>file://</code> pages, so CodeLite
+           serves itself from <code>localhost</code> and opens there. It is not
+           reachable from your network.</p>
+      </details>
+      <details>
+        <summary>Can I try it without installing anything?</summary>
+        <p>Yes &mdash; unzip the portable build anywhere and run
+           <code>START CodeLite.bat</code>. There is also a
+           <a href="src/app/">browser version</a> on this page, which works in
+           Chrome or Edge. Folder access is a browser permission there, so it
+           will ask you to confirm before opening a directory.</p>
+      </details>
+      <details>
+        <summary>Does the installer need admin rights?</summary>
+        <p>No. It is a per-user install, so it never asks for administrator
+           privileges. You can also choose whether to create a Desktop or
+           Start Menu shortcut.</p>
+      </details>
+      <details>
+        <summary>Which browsers work?</summary>
+        <p>Edge and Chrome. Folder access uses the File System Access API, which
+           those two implement fully. The editor is opened in a dedicated app
+           window rather than a normal browser tab.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ==================================================== footer -->
+  <footer>
+    <div class="fl">
+      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC">Source code</a>
+      <a href="https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/latest/download/CodeLite-Setup-1.0.0.exe">Download</a>
+      <a href="docs/CHANGELOG.md">Changelog</a>
+      <a href="docs/USER-GUIDE-EN.txt">User guide</a>
+      <a href="docs/USER-GUIDE-HI.txt">&#2375;&#2404;&#2366;&#2409;&#2368; &#2327;&#2352;&#2381;&#2337;&#2326;&#2354;&#2366;</a>
+    </div>
+    <p class="cp">&copy; 2026 CodeLite Project &mdash; a lightweight, fully offline code editor.</p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var K = "codelite_landing_theme";
+  var root = document.documentElement;
+  try {
+    var saved = localStorage.getItem(K);
+    if (saved === "light" || saved === "dark") root.dataset.theme = saved;
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches)
+      root.dataset.theme = "light";
+  } catch (e) {}
+
+  var btn = document.getElementById("tgl");
+  btn.onclick = function () {
+    var next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;
+    try { localStorage.setItem(K, next); } catch (e) {}
+  };
+})();
+</script>
+</body>
+</html>

@@ -55,4 +55,4 @@ First public release.
 - The bundled local server binds to `127.0.0.1` only and validates every
   request path against the installation directory.
 
-[1.0.0]: https://github.com/YOUR-USERNAME/CodeLite/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Abhijeet-Kumar-Prajapati/CODELITE-SOFTWARE-PC/releases/tag/v1.0.0
