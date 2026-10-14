@@ -1,0 +1,93 @@
+/* ============ CodeLite :: editor.css ============ */
+
+.editor-host{flex:1;display:flex;flex-direction:column;min-height:0}
+
+.editor-viewport{
+  position:relative;flex:1;min-height:0;overflow:hidden;
+  background:var(--bg);cursor:text;
+}
+
+/* current line highlight */
+.current-line{
+  position:absolute;left:var(--gutw);right:0;height:var(--lh);
+  background:var(--line-hl);pointer-events:none;z-index:0;display:none;
+}
+.current-line.on{display:block}
+
+/* ---------- GUTTER ---------- */
+.gutter-layer{
+  position:absolute;left:0;top:0;bottom:0;width:var(--gutw);
+  overflow:hidden;z-index:2;background:var(--bg);
+  border-right:1px solid transparent;
+}
+.gutter-inner{padding-top:8px;will-change:transform}
+.gutter-inner .gl{
+  height:var(--lh);line-height:var(--lh);padding-right:14px;
+  text-align:right;font-family:var(--font-mono);font-size:calc(var(--fs) - 1px);
+  color:var(--fg-dim);opacity:.65;
+}
+.gutter-inner .gl.cur{color:var(--fg-bright);opacity:1}
+
+/* ---------- HIGHLIGHT (underneath) ---------- */
+.highlight-layer{
+  position:absolute;left:var(--gutw);top:0;z-index:1;
+  margin:0;padding:8px 24px 40vh;
+  font-family:var(--font-mono);font-size:var(--fs);line-height:var(--lh);
+  white-space:pre;tab-size:var(--tabw);-moz-tab-size:var(--tabw);
+  color:var(--fg);pointer-events:none;will-change:transform;
+  min-width:100%;box-sizing:border-box;
+}
+.highlight-layer code{font-family:inherit;font-size:inherit}
+
+/* ---------- INPUT (on top, transparent) ---------- */
+.input-layer{
+  position:absolute;inset:0;z-index:3;
+  padding:8px 24px 40vh calc(var(--gutw) + 24px);
+  font-family:var(--font-mono);font-size:var(--fs);line-height:var(--lh);
+  white-space:pre;tab-size:var(--tabw);-moz-tab-size:var(--tabw);
+  background:transparent;color:transparent;caret-color:var(--fg-bright);
+  border:none;outline:none;resize:none;overflow:auto;
+  box-sizing:border-box;
+}
+.input-layer::selection{background:var(--sel);color:transparent}
+.input-layer.wrap{white-space:pre-wrap;word-break:break-word}
+
+/* ---------- MINIMAP ---------- */
+.minimap-layer{
+  position:absolute;right:0;top:0;bottom:0;width:var(--minimapw);z-index:2;
+  background:var(--bg);opacity:.92;pointer-events:auto;cursor:pointer;
+}
+.minimap-slider{
+  position:absolute;right:0;width:var(--minimapw);z-index:3;
+  background:rgba(120,120,120,.14);pointer-events:none;display:none;
+}
+.minimap-slider.on{display:block}
+
+/* ================= TOKEN COLORS ================= */
+.t-comment{color:var(--com);font-style:italic}
+.t-string{color:var(--str)}
+.t-number{color:var(--num)}
+.t-keyword{color:var(--kw)}
+.t-constant{color:var(--cst)}
+.t-function{color:var(--fn)}
+.t-type{color:var(--typ)}
+.t-variable{color:var(--vr)}
+.t-operator{color:var(--op)}
+.t-punct{color:var(--op);opacity:.85}
+.t-tag{color:var(--tag)}
+.t-attr{color:var(--atv)}
+.t-decorator{color:var(--dec)}
+.t-selector{color:var(--sel2)}
+.t-meta{color:var(--kw)}
+.t-regex{color:var(--str)}
+.t-invalid{color:var(--err);text-decoration:wavy underline var(--err)}
+
+html[data-theme="light"] .t-punct{color:#666}
+html[data-theme="contrast"] .t-comment{font-style:normal}
+
+/* find matches */
+.mk{background:var(--match);border-radius:2px}
+.mk.cur{background:var(--match-cur);outline:1px solid #ffd700}
+
+/* search highlight in results */
+.search-hit{background:var(--match);border-radius:2px}

@@ -1,0 +1,165 @@
+================================================================
+  CodeLite  -  a lightweight code editor
+  Version 1.0
+================================================================
+
+
+KYA HAI YE?
+----------------------------------------------------------------
+CodeLite ek code editor hai - bilkul VS Code jaisa, lekin halka
+aur offline chalne wala. Ismein syntax highlighting, file explorer,
+tabs, find/replace, search, command palette aur minimap sab hai.
+
+Ye koi cracked ya modified software NAHI hai. Ye poora offline
+chalta hai - internet ki zaroorat nahi.
+
+
+Kaise chalayein (INSTALL)
+----------------------------------------------------------------
+1.  Is folder ko kahin bhi rakhein, jaise:
+        C:\Tools\CodeLite
+
+2.  IMPORTANT: folder ke andar saari files rakhein. Koi file
+    bahar mat nikalein.
+
+3.  "START CodeLite.bat" par DOUBLE-CLICK karein.
+
+4.  5-10 second me CodeLite ka window khul jayega.
+
+Bas. Kuch install karne ki zaroorat nahi.
+
+   NOTE: File ko hamesha .bat se chalayein. Agar aap seedha
+   index.html kholein to folder access kaam nahi karega.
+
+
+Pehli baar ke baad
+----------------------------------------------------------------
+-  Window ke upar "Open Folder" dabayein
+-  Apna project folder choose karein
+-  Ab aap left side mein saari files dekhenge aur code likh
+   sakte hain
+
+"New Untitled File" se bina folder kholay bhi code likh sakte
+hain. Save karte waqt wo file aap choose kar sakte hain.
+
+
+Keyboard Shortcuts (IMPORTANT)
+----------------------------------------------------------------
+  Ctrl + P                File jaldi se kholo (Go to file)
+  Ctrl + Shift + P        Saare commands ka menu
+  Ctrl + S                Save
+  Ctrl + Shift + S        Save As (nayi jagah save)
+  Ctrl + F                Find
+  Ctrl + H                Find & Replace
+  Ctrl + G                Go to line / column
+  Ctrl + B                Sidebar chhupao / dikhao
+  Ctrl + K  then Ctrl + O Open folder
+  Ctrl + ,               Settings (font size, theme, etc.)
+  Ctrl + /                Comment on/off karo
+  Ctrl + Shift + K        Poori line delete karo
+  Ctrl + D                Line duplicate karo
+  Alt + Up / Down         Line upar / neeche move karo
+  Alt + Z                 Word wrap on/off
+  Ctrl + = / Ctrl + -     Font size badhao / ghatao
+  F11                     Full screen
+  Esc                     Search ya command band karo
+
+  Double click            Word select
+  Ctrl + L                Selection expand karo
+  Wheel scroll            Normal scroll
+
+
+Features
+----------------------------------------------------------------
+  SYNTAX HIGHLIGHTING
+    30+ languages: JavaScript, TypeScript, Python, Java, C, C++,
+    C#, Go, Rust, PHP, Ruby, SQL, HTML, CSS, SCSS, JSON, YAML,
+    XML, Markdown, Shell, PowerShell, Lua, Dart, Swift, Kotlin,
+    Perl, R, Docker, TOML, INI aur baki.
+
+  FILE EXPLORER
+    - Folder tree, lazy loading (bade projects bhi tez khulta hain)
+    - New file / New folder / Rename / Delete
+    - .git, node_modules, __pycache__ automatic chhup jaate hain
+
+  TABS
+    - Multiple files ek saath
+    - Unsaved file pe chhota sa dot dikhta hai
+    - Tab pe middle-click karke band kar sakte hain
+
+  EDITOR
+    - Line numbers + current line highlight
+    - Automatic indentation (Enter dabate hi)
+    - Automatic closing bracket: ( { [ " `
+    - Selection ko quote/bracket se wrap
+    - Comment toggle (Ctrl + /)
+    - Minimap (right side ka chhota code map)
+
+  FIND & REPLACE
+    - Regex support (*.* *)
+    - Match Case aur Whole Word options
+    - Replace / Replace All
+
+  SEARCH IN FILES
+    - Poore project mein text dhoondhein
+    - Click karke seedha us line par pahunch jayein
+
+  COMMAND PALETTE
+    - Ctrl + Shift + P se har command milti hai
+
+  OUTLINE
+    - File ke andar saare function / class ki list
+
+  SETTINGS
+    - Font size, tab size, theme, word wrap, minimap
+    - Theme: Dark+ / Light+ / High Contrast
+    - Settings apne aap save ho jaati hain
+
+
+Band karne ka tarika
+----------------------------------------------------------------
+-  Window ka "Exit" button dabayein, ya
+-  window band kar dein (server apne aap ruk jaata hai), ya
+-  "STOP CodeLite.bat" chala dein
+
+
+Common problems
+----------------------------------------------------------------
+  "Could not find Microsoft Edge or Google Chrome"
+      -> Chrome ya Edge install karein.
+
+  Folder open nahi ho raha
+      -> .bat se hi chalayein.
+      -> Microsoft Edge ya Chrome use karein (Firefox me folder
+         access kaam nahi karta).
+
+  Kuch nahi ho raha / window nahi khul raha
+      -> "STOP CodeLite.bat" chala kar dobara try karein.
+      -> Antivirus me alert aaya ho to "Allow" karein.
+
+  Window bahut chhoti lag rahi hai
+      -> window ko drag karke bada karein, ya F11 dabayein.
+
+
+Privacy
+----------------------------------------------------------------
+CodeLite poori tarah OFFLINE chalta hai.
+
+-  Koi telemetry nahi
+-  Koi internet request nahi (server sirf localhost par hai,
+   yaani sirf usi computer par - bahar nahi)
+-  Sirf Microsoft Edge / Chrome ka default telemetry hota hai,
+   wo aap browser settings me band kar sakte hain
+-  Aapka code kahin upload nahi hota
+
+
+System requirements
+----------------------------------------------------------------
+-  Windows 10 ya 11
+-  Microsoft Edge ya Google Chrome (dono free hain)
+-  ~5 MB disk space
+
+
+================================================================
+Enjoy coding!
+================================================================

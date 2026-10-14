@@ -1,0 +1,58 @@
+CodeLite 1.0.0 - Setup Information
+==================================
+
+WHAT THIS INSTALLER DOES
+------------------------
+* Installs CodeLite into your user profile folder:
+      %LOCALAPPDATA%\Programs\CodeLite
+
+  No administrator rights are required. CodeLite does not modify the
+  Program Files folder and does not touch system settings.
+
+* Creates a Start Menu shortcut (with an uninstall entry).
+
+* Optionally creates a Desktop shortcut (you can untick it).
+
+* Optionally adds CodeLite to your Windows startup folder.
+
+* Registers itself in Apps & Features so you can uninstall it normally.
+
+
+WHAT YOU NEED
+-------------
+* Windows 10 or Windows 11
+* Microsoft Edge or Google Chrome (both are already installed on
+  most Windows PCs, and both are free)
+
+CodeLite runs entirely on your own computer. It never connects to the
+internet and it never uploads your code.
+
+
+PRIVACY
+-------
+* No telemetry
+* No analytics
+* No online accounts
+* Your code stays on your machine, in your machine's memory only
+
+
+FILES THAT GET CREATED
+----------------------
+%LOCALAPPDATA%\Programs\CodeLite     the application itself
+%APPDATA%\Microsoft\Windows\Start Menu\Programs\CodeLite
+                                    shortcuts
+%TEMP%\codelite.port                a small local marker file, removed
+                                    when CodeLite exits
+
+
+A NOTE ON WINDOWS SMARTSCREEN
+-----------------------------
+This installer is not yet code-signed, so Windows SmartScreen may show
+a blue "Windows protected your PC" message the first time you run it.
+
+That is expected for any brand-new, unsigned release. To proceed:
+
+  1. Click "More info"
+  2. Click "Run anyway"
+
+You only ever need to do this once per file.

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeLite</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ================= TITLE BAR ================= -->
+  <header id="titlebar">
+    <div class="tb-left">
+      <span class="tb-logo">CL</span>
+      <span class="tb-title" id="tbTitle">CodeLite</span>
+      <span class="tb-menu" id="menuFile">File</span>
+      <span class="tb-menu" id="menuEdit">Edit</span>
+      <span class="tb-menu" id="menuView">View</span>
+    </div>
+    <div class="tb-center">
+      <div class="quick-open" id="quickOpenWrap">
+        <input type="text" id="quickOpenInput" placeholder="Search files by name  (Ctrl + P)" spellcheck="false" autocomplete="off">
+      </div>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" id="btnOpenFolder" title="Open Folder">Open Folder</button>
+      <button class="tb-btn" id="btnNewFile" title="New File">New File</button>
+      <button class="tb-btn" id="btnSettings" title="Settings">Settings</button>
+      <button class="tb-btn danger" id="btnExit" title="Exit CodeLite">Exit</button>
+    </div>
+  </header>
+
+  <!-- ================= WORKBENCH ================= -->
+  <div id="workbench">
+
+    <!-- Activity Bar -->
+    <nav id="activitybar">
+      <button class="act active" data-view="explorer" title="Explorer (Ctrl+Shift+E)">
+        <svg viewBox="0 0 24 24"><path d="M4 4h5l2 2h9v14H4z"/></svg>
+      </button>
+      <button class="act" data-view="search" title="Search (Ctrl+Shift+F)">
+        <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 105.3 11.6l4.1 4.1 1.4-1.4-4.1-4.1A7 7 0 0010 3zm0 2a5 5 0 110 10 5 5 0 010-10z"/></svg>
+      </button>
+      <button class="act" data-view="outline" title="Outline">
+        <svg viewBox="0 0 24 24"><path d="M3 5h8v2H3zm0 6h8v2H3zm0 6h8v2H3zm10-12h8v2h-8zm0 6h8v2h-8zm0 6h8v2h-8z"/></svg>
+      </button>
+      <div class="act-spacer"></div>
+      <button class="act" id="actZoomOut" title="Zoom Out"><svg viewBox="0 0 24 24"><path d="M5 11h14v2H5z"/></svg></button>
+      <button class="act" id="actZoomIn" title="Zoom In"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></button>
+    </nav>
+
+    <!-- Side Bar -->
+    <aside id="sidebar">
+      <div class="sidebar-head">
+        <span id="sidebarTitle">EXPLORER</span>
+        <div class="sidebar-actions">
+          <button id="sbNewFile" title="New File">＋</button>
+          <button id="sbNewFolder" title="New Folder">🗀</button>
+          <button id="sbRefresh" title="Refresh">⟳</button>
+          <button id="sbCollapse" title="Collapse All">⌄</button>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-explorer">
+        <div class="folder-row" id="folderRow">
+          <span class="chev" id="folderChev">▾</span>
+          <span class="fname" id="folderName">No folder opened</span>
+        </div>
+        <div class="file-tree" id="fileTree"></div>
+      </div>
+
+      <div class="pane hidden" id="pane-search">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search" spellcheck="false">
+          <div class="search-opts">
+            <button class="sopt" id="optCase" title="Match Case">Aa</button>
+            <button class="sopt" id="optWord" title="Whole Word">ab</button>
+            <button class="sopt" id="optRegex" title="Regex">.*</button>
+          </div>
+        </div>
+        <div class="search-summary" id="searchSummary">No results</div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+
+      <div class="pane hidden" id="pane-outline">
+        <div class="outline" id="outlineList"></div>
+      </div>
+    </aside>
+
+    <!-- Editor Area -->
+    <main id="editorArea">
+      <div id="tabsBar" class="tabs-bar"></div>
+
+      <!-- Find / Replace bar -->
+      <div id="findBar" class="find-bar hidden">
+        <div class="fb-row">
+          <span class="fb-icon">🔍</span>
+          <input type="text" id="findInput" placeholder="Find" spellcheck="false">
+          <span class="fb-count" id="findCount">No results</span>
+          <button class="fb-btn" id="findPrev" title="Previous (Shift+Enter)">↑</button>
+          <button class="fb-btn" id="findNext" title="Next (Enter)">↓</button>
+          <button class="fb-btn" id="findToggleReplace" title="Toggle Replace">⇕</button>
+          <button class="fb-btn" id="findClose" title="Close (Esc)">✕</button>
+        </div>
+        <div class="fb-row hidden" id="replaceRow">
+          <span class="fb-icon">↺</span>
+          <input type="text" id="replaceInput" placeholder="Replace" spellcheck="false">
+          <button class="fb-btn wide" id="btnReplace" title="Replace">Replace</button>
+          <button class="fb-btn wide" id="btnReplaceAll" title="Replace All">All</button>
+        </div>
+        <div class="fb-row fb-opts">
+          <button class="fb-opt" id="ffCase" title="Match Case">Aa</button>
+          <button class="fb-opt" id="ffWord" title="Whole Word">ab|</button>
+          <button class="fb-opt" id="ffRegex" title="Regular Expression">.*</button>
+        </div>
+      </div>
+
+      <div id="editorHost" class="editor-host">
+        <div id="breadcrumbs" class="breadcrumbs hidden"></div>
+        <div class="editor-viewport" id="viewport">
+          <div class="current-line" id="currentLine"></div>
+          <div class="gutter-layer" id="gutterLayer">
+            <div class="gutter-inner" id="gutterInner"></div>
+          </div>
+          <pre class="highlight-layer" id="highlightLayer" aria-hidden="true"></pre>
+          <textarea class="input-layer" id="inputLayer" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+          <canvas class="minimap-layer" id="minimap"></canvas>
+          <div class="minimap-slider" id="minimapSlider"></div>
+        </div>
+      </div>
+
+      <div id="welcome" class="welcome">
+        <div class="welcome-card">
+          <div class="wc-logo">CodeLite</div>
+          <div class="wc-sub">A fast, lightweight code editor</div>
+          <div class="wc-actions">
+            <button class="wc-btn primary" id="wcOpenFolder">Open Folder</button>
+            <button class="wc-btn" id="wcNewFile">New Untitled File</button>
+          </div>
+          <div class="wc-hint" id="wcHint"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= STATUS BAR ================= -->
+  <footer id="statusbar">
+    <span class="sb-item" id="sbBranch">⎇ main</span>
+    <span class="sb-item" id="sbProblems">⚠ 0</span>
+    <span class="sb-item" id="sbLang">Plain Text</span>
+    <span class="spacer"></span>
+    <span class="sb-item" id="sbSaved">Saved</span>
+    <span class="sb-item" id="sbPos">Ln 1, Col 1</span>
+    <span class="sb-item" id="sbSel">0 selected</span>
+    <span class="sb-item" id="sbIndent">Spaces: 2</span>
+    <span class="sb-item" id="sbEol">LF</span>
+    <span class="sb-item" id="sbEnc">UTF-8</span>
+  </footer>
+</div>
+
+<!-- ================= COMMAND PALETTE ================= -->
+<div id="paletteOverlay" class="overlay hidden">
+  <div class="palette">
+    <div class="pal-head">
+      <span class="pal-sigil">&gt;</span>
+      <input type="text" id="paletteInput" placeholder="Type a command..." spellcheck="false" autocomplete="off">
+    </div>
+    <ul class="pal-list" id="paletteList"></ul>
+  </div>
+</div>
+
+<!-- ================= QUICK OPEN ================= -->
+<div id="quickOpenOverlay" class="overlay hidden">
+  <div class="palette">
+    <div class="pal-head">
+      <span class="pal-sigil">⌕</span>
+      <input type="text" id="quickOpenListInput" placeholder="Go to file..." spellcheck="false" autocomplete="off">
+    </div>
+    <ul class="pal-list" id="quickOpenList"></ul>
+  </div>
+</div>
+
+<!-- ================= PROMPT DIALOG ================= -->
+<div id="promptOverlay" class="overlay hidden">
+  <div class="dialog">
+    <div class="dlg-title" id="promptTitle">Enter value</div>
+    <input type="text" id="promptInput" spellcheck="false" autocomplete="off">
+    <div class="dlg-actions">
+      <button class="wc-btn" id="promptCancel">Cancel</button>
+      <button class="wc-btn primary" id="promptOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS ================= -->
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="dialog wide-dialog">
+    <div class="dlg-title">Settings</div>
+    <div class="settings-grid">
+      <label>Font Size</label>
+      <div class="stepper"><button data-set="fontSize" data-d="-1">−</button><span id="valFontSize">14</span><button data-set="fontSize" data-d="1">＋</button></div>
+
+      <label>Tab Size</label>
+      <div class="stepper"><button data-set="tabSize" data-d="-1">−</button><span id="valTabSize">2</span><button data-set="tabSize" data-d="1">＋</button></div>
+
+      <label>Theme</label>
+      <select id="setTheme">
+        <option value="dark">Dark+</option>
+        <option value="light">Light+</option>
+        <option value="contrast">High Contrast Dark</option>
+      </select>
+
+      <label>Word Wrap</label>
+      <select id="setWordWrap"><option value="off">Off</option><option value="on">On</option></select>
+
+      <label>Minimap</label>
+      <select id="setMinimap"><option value="on">On</option><option value="off">Off</option></select>
+
+      <label>Format On Save</label>
+      <select id="setFormat"><option value="off">Off</option><option value="on">On (trim trailing spaces)</option></select>
+    </div>
+    <div class="dlg-actions">
+      <button class="wc-btn" id="settingsReset">Reset Defaults</button>
+      <button class="wc-btn primary" id="settingsClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/highlight.js"></script>
+<script src="js/minimap.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/explorer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

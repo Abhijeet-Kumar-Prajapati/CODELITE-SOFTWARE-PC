@@ -1,0 +1,28 @@
+# build artefacts
+dist/
+*.exe
+*.zip
+*.msi
+*.msix
+
+# Inno Setup
+*.iss.iss
+Output/
+
+# logs
+*.log
+
+# editor / OS noise
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# node (not used, but just in case)
+node_modules/
+
+# temporary
+*.tmp
+*.bak

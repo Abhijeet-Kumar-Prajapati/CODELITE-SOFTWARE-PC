@@ -1,0 +1,206 @@
+============================================================
+  CodeLite  -  User Guide (English)
+  Version 1.0.0
+============================================================
+
+
+WHAT IS CODELITE?
+----------------------------------------------------------------
+CodeLite is a small, fast code editor. It looks and works like a
+familiar modern editor, but it weighs less than 100 KB of code and
+runs completely offline.
+
+It has no tracking, no ads and no account. Your code never leaves
+your computer.
+
+
+STARTING CODELITE
+----------------------------------------------------------------
+Use the CodeLite shortcut:
+
+  * Start Menu  ->  CodeLite
+  * Desktop     ->  CodeLite
+
+A CodeLite window opens after a few seconds. That is it.
+
+
+THE FIRST THING TO DO
+----------------------------------------------------------------
+Click "Open Folder" in the welcome screen, then choose your project
+folder.
+
+Everything inside that folder now shows up in the left sidebar, and
+you can start editing straight away.
+
+
+IF NOTHING HAPPENS
+----------------------------------------------------------------
+* Always start CodeLite from the shortcut - not from index.html.
+* A small black console window flashes for about a second while the
+  local server starts. That is normal.
+* If the app does not open, check that Edge or Chrome is installed.
+
+Full troubleshooting is at the bottom of this file.
+
+
+EDITOR BASICS
+----------------------------------------------------------------
+Editing              Type normally. Auto-indent handles indentation.
+Matching brackets    Type (  {  [  "  `  and the closing one is added.
+Close selection      Select text and press (  - it wraps the selection.
+Select a word        Double-click it.
+Select a line        Click in the gutter on the left.
+Go to a line         Ctrl + G
+Find                 Ctrl + F
+Replace              Ctrl + H
+
+Multiple files       Open as many as you like. Each gets its own tab.
+Unsaved marker       A dot on the tab means unsaved changes.
+Close a tab          Click the x, or middle-click the tab.
+Save a tab           Ctrl + S
+Save somewhere else  Ctrl + Shift + S
+
+Delete a whole line     Ctrl + Shift + K
+Duplicate a line        Ctrl + D
+Move a line up / down   Alt + Up / Alt + Down
+Comment / uncomment     Ctrl + /   (adds // or # depending on language)
+Indent / outdent block  Tab / Shift + Tab
+Expand selection        Ctrl + L
+
+
+THE LEFT SIDEBAR
+----------------------------------------------------------------
+Explorer tab      The folder tree. Click the arrow next to a folder to
+                  open it. Right-click a file to rename or delete it.
+                  Use the ＋ buttons at the top to create a new file
+                  or folder.
+
+Search tab        Search for text across every file in the project.
+                  Options: Match Case (Aa), Whole Word (ab), Regex (.*).
+                  Click any result to jump straight to that line.
+
+Outline tab       Every function and class in the current file.
+                  Click one to jump to it.
+
+
+FIND AND REPLACE
+----------------------------------------------------------------
+Ctrl + F opens the find bar.
+
+  Aa    Match Case
+  ab    Whole Word only
+  .*    Treat the search box as a regular expression
+
+Enter goes to the next match, Shift+Enter to the previous one.
+All matches are highlighted in the editor as you type.
+
+Toggle the replace row with the ⇕ button, then use
+"Replace" or "All".
+
+
+SYNTAX HIGHLIGHTING
+----------------------------------------------------------------
+CodeLite colours your code for these languages out of the box:
+
+  JavaScript, TypeScript, JSX/TSX, Python, Java, C, C++, C#, Go,
+  Rust, PHP, Ruby, SQL, HTML, CSS, SCSS, Less, JSON, YAML, TOML,
+  XML, SVG, Vue, Markdown, Shell/Bash, PowerShell, Batch, Lua,
+  Dart, Swift, Kotlin, Perl, R, Dockerfile, INI
+
+Any other file type still opens fine - it is just shown as plain text.
+
+
+COLOUR THEMES
+----------------------------------------------------------------
+Press Ctrl + , to open Settings.
+
+  Theme          Dark+ (default), Light+, High Contrast Dark
+  Font Size      10 to 28
+  Tab Size       how many spaces one Tab inserts
+  Word Wrap      keep long lines visible, or scroll sideways
+  Minimap        the small code map on the right
+
+Settings are remembered the next time you open CodeLite.
+
+
+KEYBOARD SHORTCUTS
+----------------------------------------------------------------
+  Ctrl + P                 Go to file (type a name, jump straight there)
+  Ctrl + Shift + P         Command palette - every command in one list
+  Ctrl + S                 Save
+  Ctrl + Shift + S         Save As
+  Ctrl + F                 Find
+  Ctrl + H                 Find and replace
+  Ctrl + G                 Go to line / column
+  Ctrl + B                 Show / hide the sidebar
+  Ctrl + K then Ctrl + O   Open folder
+  Ctrl + Shift + E         Go to Explorer
+  Ctrl + Shift + F         Go to Search
+  Ctrl + ,                 Settings
+  Ctrl + /                 Toggle comment
+  Ctrl + Shift + K         Delete line
+  Ctrl + D                 Duplicate line
+  Ctrl + L                 Expand selection
+  Alt + Up / Down          Move line up / down
+  Alt + Z                  Toggle word wrap
+  Ctrl + = / Ctrl + -      Font size bigger / smaller
+  F11                      Full screen
+  Esc                      Close find bar or command palette
+
+
+WHY DOES CODELITE START A LOCAL SERVER?
+----------------------------------------------------------------
+Browsers only allow a web page to read your files when the page is
+served from a secure origin. CodeLite therefore starts a tiny server
+that listens on your computer only (127.0.0.1) and never leaves your
+machine.
+
+It is not reachable from the internet or from any other computer.
+
+You can stop it at any time by closing the CodeLite window, or by
+running "STOP CodeLite.bat" from the installation folder.
+
+
+HOW FILES ARE SAVED
+----------------------------------------------------------------
+When you open a folder, CodeLite gets permission from Windows to work
+with those files directly. Saving overwrites the real file on disk -
+exactly like a normal editor.
+
+If you create a new file without opening a folder, Windows will ask
+you where to put it the first time you save.
+
+
+UNINSTALLING
+----------------------------------------------------------------
+Windows Settings  ->  Apps  ->  Installed apps  ->  CodeLite  ->
+Uninstall
+
+Or: Control Panel -> Programs and Features -> CodeLite -> Uninstall
+
+
+TROUBLESHOOTING
+----------------------------------------------------------------
+The window does not open
+    Make sure you used the CodeLite shortcut.
+    Close any black console window titled "CodeLite Server", then
+    start CodeLite again.
+
+"Open Folder" does nothing
+    Open Folder needs Microsoft Edge or Google Chrome.
+    Firefox blocks folder access in web pages.
+
+Windows SmartScreen warning
+    Click "More info", then "Run anyway". This happens once.
+
+A black console window flashes
+    Expected. It is the local server starting, and it closes by itself.
+
+Everything is slow with a huge project
+    CodeLite skips node_modules, .git and __pycache__ automatically.
+    Search is limited to 400 files at a time to stay responsive.
+
+
+============================================================
+Enjoy the quiet, offline editor.
+============================================================
